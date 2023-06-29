@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TrailStatus {
+  ACTIVE
+  INATIVE
+}
+
+model Trail {
+  id String @id @default(uuid())
+
+  title       String
+  description String?
+  slug        String      @unique
+  status      TrailStatus @default(ACTIVE)
+
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @default(now())
+  courses     Course[]
+  enrollments Enrollment[]
+
+  @@map("trails")
+}
+
+model Course {
+  id String @id @default(uuid())
+
+  trail    Trail    @relation(fields: [trail_id], references: [id])
+  trail_id String
+  Lesson   Lesson[]
+
+  @@map("course")
+}
+
+model Lesson {
+  id String @id @default(uuid())
+
+  course    Course @relation(fields: [course_id], references: [id])
+  course_id String
+
+  @@map("lesson")
+}
+
+model Student {
+  id String @id @default(uuid())
+
+  name  String
+  email String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  enrollments Enrollment[]
+
+  @@map("student")
+}
+
+model Enrollment {
+  id String @id @default(uuid())
+
+  trail      Trail?   @relation(fields: [trail_id], references: [id])
+  trail_id   String?
+  student    Student? @relation(fields: [student_id], references: [id])
+  student_id String?
+
+  @@map("enrollment")
+}
